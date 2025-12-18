@@ -31,7 +31,7 @@ public class Main {
             File file = new File(fileName);
 
             try {
-                Scanner sc=new Scanner(System.in);
+                Scanner sc=new Scanner(file);
                 while (sc.hasNextLine()){
                     String line = sc.nextLine();
                     //20,Oil,3000 gibi olucak
@@ -44,7 +44,7 @@ public class Main {
 
                         int commindex = getCommIndex(namecomm);
 
-                        if(day>=1 && day < DAYS && commindex!=-1){
+                        if(day>=1 && day <= DAYS && commindex!=-1){
                             data[m][day-1][commindex]=profit;
                         }
                     }
@@ -58,9 +58,9 @@ public class Main {
     // ======== 10 REQUIRED METHODS (Students fill these) ========
 
     public static String mostProfitableCommodityInMonth(int month) {
-        if(month<0 || month>=MONTHS){return "DUMMY";}
+        if(month<0 || month>=MONTHS){return "Invalid-Month";}
 
-        int maxProfit = Integer.MIN_VALUE; // En küçük sayı başlangıç say.
+        int maxProfit = -10000000; // En küçük sayı başlangıç say.
         int bestCommindex = -1;
 
         for(int c=0;c<COMMS;c++){ //Emtiaları gez
@@ -78,25 +78,68 @@ public class Main {
     }
 
     public static int totalProfitOnDay(int month, int day) {
-        if(month<0 || month>=MONTHS || day<1 || day > DAYS){return 1234;}//geçersiz değer girmesi için.
+        if(month<0 || month>=MONTHS || day<1 || day > DAYS){return -99999;}//geçersiz değer girmesi için.
         int total = 0;
 
-        for(int c=0;c<COMMS;c++){//belli gün ve aydaki emtiaları toplar.
+        for(int c=0;c<COMMS;c++){ //belli gün ve aydaki emtiaları toplar.
             total += data[month][day-1][c];
         }
         return total;
     }
 
     public static int commodityProfitInRange(String commodity, int from, int to) {
-        return 1234;
+        int idx = getCommIndex(commodity);
+        if(idx==-1||from>to||to>DAYS){
+            return -99999;
+        }
+        int total = 0;
+
+        for(int m=0;m<MONTHS;m++){
+            for(int d=0;d<DAYS;d++){
+                total += data[m][d-1][idx];
+            }
+        }
+        return total;
     }
 
-    public static int bestDayOfMonth(int month) { 
-        return 1234; 
+    public static int bestDayOfMonth(int month) {
+        if(month<0||month>MONTHS){
+        return -1; }
+
+        int maxprofit=-100000000;
+        int bestDay=-1;
+
+        for(int d=0;d<DAYS;d++){//28 günü gez
+            int dailyTotal=0;
+            for(int c = 0;c<COMMS;c++){//O günün comm(emtia) toplar.
+                dailyTotal+=data[month][d][c];
+            }
+            if(dailyTotal>maxprofit){
+                maxprofit=dailyTotal;
+                bestDay=d+1; //index 0'ken gün 1'dir
+            }
+        }
+        return bestDay;
     }
     
-    public static String bestMonthForCommodity(String comm) { 
-        return "DUMMY"; 
+    public static String bestMonthForCommodity(String comm) {
+        int idx=getCommIndex(comm);
+        if(idx==-1){return "Invalid-Commodity";}
+
+        int maxProfit=-1000000000;
+        int bestmonthindex=-1;
+
+        for(int m=0;m<MONTHS;m++){
+            int monthtotal=0;
+            for(int d=0;d<DAYS;d++){
+                monthtotal+=data[m][d][idx];
+            }
+            if(monthtotal>maxProfit){
+                maxProfit=monthtotal;
+                bestmonthindex=m;
+            }
+        }
+        return months[bestmonthindex];
     }
 
     public static int consecutiveLossDays(String comm) { 
