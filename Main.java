@@ -142,12 +142,48 @@ public class Main {
         return months[bestmonthindex];
     }
 
-    public static int consecutiveLossDays(String comm) { 
-        return 1234; 
+    public static int consecutiveLossDays(String comm) {
+        int idx = getCommIndex(comm);
+        if (idx == -1) {
+            return -1;
+        }
+
+        int maxStreak = 0;
+        int currStreak =0;
+
+        for(int m=0;m<MONTHS;m++){
+            for(int d=0;d<DAYS;d++){
+                if(data[m][d][idx]<0){
+                    currStreak++;
+                }
+                else {
+                    if(currStreak>maxStreak){
+                        maxStreak=currStreak;
+                    }
+                    currStreak=0;
+                }
+            }
+        }
+        if(currStreak>maxStreak){
+            currStreak=maxStreak;
+        }
+        return maxStreak;
     }
     
-    public static int daysAboveThreshold(String comm, int threshold) { 
-        return 1234; 
+    public static int daysAboveThreshold(String comm, int threshold) {
+        int idx = getCommIndex(comm);
+        if(idx==-1){
+            return -1;
+        }
+        int count=0;
+        for(int m=0;m<MONTHS;m++){
+            for(int d=0;d<DAYS;d++){
+                if(data[m][d][idx]>threshold){
+                    count++;
+                }
+            }
+        }
+        return count;
     }
 
     public static int biggestDailySwing(int month) { 
