@@ -32,8 +32,14 @@ public class Main {
 
             try {
                 Scanner sc=new Scanner(file);
+                //System.out.println("Dosya açıldı: " + fileName); //Kontrolüm için
+                if(sc.hasNextLine()){
+                    sc.nextLine();
+                }
                 while (sc.hasNextLine()){
                     String line = sc.nextLine();
+                    if(line.trim().isEmpty()) continue;
+
                     //20,Oil,3000 gibi olucak
                     String[] parts = line.split(",");
                     // Araya virgül koymak için.
@@ -46,10 +52,15 @@ public class Main {
 
                         if(day>=1 && day <= DAYS && commindex!=-1){
                             data[m][day-1][commindex]=profit;
-                        }
+                        }//else{
+                           // System.out.println("Geçersiz veri: " + line + " Index " + commindex);
+                        //}
                     }
                 }
+                sc.close();
             } catch (Exception e) {
+                //System.out.println("Dosya okuma hatası " + fileName);
+                //e.printStackTrace();
                 // Exception olmaması ve göstermemesi için.
             }
         }
@@ -95,7 +106,7 @@ public class Main {
         int total = 0;
 
         for(int m=0;m<MONTHS;m++){
-            for(int d=0;d<DAYS;d++){
+            for(int d = from; d <= to; d++){
                 total += data[m][d-1][idx];
             }
         }
@@ -186,18 +197,77 @@ public class Main {
         return count;
     }
 
-    public static int biggestDailySwing(int month) { 
-        return 1234; 
-    }
-    
-    public static String compareTwoCommodities(String c1, String c2) { 
-        return "DUMMY is better by 1234"; 
-    }
-    
-    public static String bestWeekOfMonth(int month) { 
-        return "DUMMY"; 
-    }
+    public static int biggestDailySwing(int month) {
+        if(month<0||month>MONTHS){
+        return -99999;}
 
+        int maxSwing=0;
+        for(int d=1;d<DAYS;d++){
+            int profitToday=0;
+            int profitYesterday=0;
+            for(int c=0;c<COMMS;c++){
+                profitToday+=data[month][d][c];
+                profitYesterday+=data[month][d-1][c];
+            }
+
+            int swing = Math.abs(profitToday-profitYesterday);
+            if(swing>maxSwing){
+                maxSwing=swing;
+            }
+        }
+        return maxSwing;
+    }
+    
+    public static String compareTwoCommodities(String c1, String c2) {
+        int idx1 = getCommIndex(c1);
+        int idx2 = getCommIndex(c2);
+
+        if(idx1==-1||idx2==-1){
+        return "Invalid commodity.";}
+
+        int total1 = 0;
+        int total2 = 0;
+
+        for(int m=0;m<MONTHS;m++){
+            for(int d=0;d<DAYS;d++){
+                total1 += data[m][d][idx1];
+                total2 += data[m][d][idx2];
+            }
+        }
+        if(total1>total2){
+            return c1 + " is better by " + (total1-total2);
+        }
+        else if(total2>total1){
+            return c2 + " is better by " + (total2-total1);
+        }
+        else {
+            return "They are equal.";
+        }
+    }
+    
+    public static String bestWeekOfMonth(int month) {
+        if(month < 0 || month >= MONTHS) { return "INVALID_MONTH"; }
+        int[] profitsweek = new int[4];
+
+        for(int d=0;d<DAYS;d++){
+            int dailytotal=0;
+            for(int c =0;c<COMMS;c++){
+                dailytotal += data[month][d][c];
+            }
+            int wIndex = d/7;
+            profitsweek[wIndex]+=dailytotal;
+        }
+        int maxValue = -10000000;
+        int bestWeek = -1;
+
+        for(int i =0;i<4;i++){
+            if(profitsweek[i]>maxValue){
+                maxValue=profitsweek[i];
+                bestWeek=i;
+            }
+        }
+        return "Week " + (bestWeek + 1);
+    }
     public static void main(String[] args) {
         loadData();
         System.out.println("Data loaded – ready for queries");
